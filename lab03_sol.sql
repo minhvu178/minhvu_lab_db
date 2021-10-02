@@ -120,6 +120,8 @@ CREATE TABLE Ratings (
     WhenRated       DATETIME(2),
     NumberStars     INT
 );
+-- WB: You haven't fixed the design flaw. There is a multi-valued field here, which needs 
+-- to become a linking table and associated validation table.
 
 /* Populate the tables with sample data */
 INSERT INTO Movies(MovieTitle, ReleaseDate, Genre)
