@@ -19,7 +19,7 @@ Description:          The address of the customers in our database. The values i
 PHYSICAL ELEMENTS
 
 Data Type:            Alphanumeric 
-Length:               max
+Length:               max   WB: What maximum will you use? You must specify a number here.
 Decimal Places:       _ 
 Input Mask:           _ 
 Display Format:       _ 
@@ -57,7 +57,7 @@ Default Value:     _
 Range of Values:   _ 
 
 Edit Rule:
-  Enter now, edits allowed:       X 
+  Enter now, edits allowed:       X   WB: If it will not be required, it should be "enter later".
   Enter now, edits not allowed:   _ 
   Enter later, edits allowed:     _ 
   Enter later, edits not allowed: _ 

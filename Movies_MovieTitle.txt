@@ -43,7 +43,7 @@ Key Structure: Simple:     _
 Uniqueness:    Non-unique: X 
                Unique:     _ 
 
-Null Support:  Nulls OK:   X 
+Null Support:  Nulls OK:   X WB: Every movie should proabably have a title.
                No nulls:   _ 
 
 Values Entered By: User:   X
@@ -57,7 +57,7 @@ Default Value:     _
 Range of Values:   _ 
 
 Edit Rule:
-  Enter now, edits allowed:       X
+  Enter now, edits allowed:       X WB: Movies titles shouldn't change.
   Enter now, edits not allowed:   _ 
   Enter later, edits allowed:     _ 
   Enter later, edits not allowed: _ 

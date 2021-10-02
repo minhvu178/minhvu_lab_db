@@ -33,12 +33,12 @@ Character Support:
 LOGICAL ELEMENTS
 
 Key Type:      Non:        _ 
-               Primary:    _
+               Primary:    _ WB: This is actually both an FK, and part of a CPK. Both of these chould be selected.
                Foreign:    X
                Alternate:  _ 
 
 Key Structure: Simple:     x 
-               Composite:  _ 
+               Composite:  _ WB: Again, this is also part of a CPK.
 
 Uniqueness:    Non-unique: _ 
                Unique:     X 
