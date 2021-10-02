@@ -1,0 +1,54 @@
+BUSINESS RULE SPECIFICATIONS
+
+RULE INFORMATION
+
+Statement:  Customer can share address 
+
+Constraint:  A single record in Addresses can be associated with two or more records from the Customers table. 
+
+Type:     Database Oriented:     X 
+          Application Oriented   _ 
+
+Category: Field Specific:        _ 
+          Relationship Specific:  X
+
+Test On:  Insert:                X 
+          Delete:                X
+          Update:                X
+
+
+STRUCTURES AFFECTED
+
+Field Names: _ 
+
+Table Names: Addresses, Customers
+
+
+FIELD ELEMENTS AFFECTED
+
+Physical Elements: Data Type:           _ 
+                   Length:              _ 
+                   Decimal Places:      _ 
+                   Character Support:   _ 
+                   Input Mask:          _ 
+                   Display Format:      _ 
+
+Logical Elements:  Key Type:            _ 
+                   Key Structure:       _ 
+                   Uniqueness:          _ 
+                   Null Support:        _ 
+                   Values Entered By:   _ 
+                   Default Value:       _ 
+                   Range of Values:     _ 
+                   Comparisons Allowed: _ 
+                   Operations Allowed:  _ 
+                   Edit Rule:           _ 
+
+
+ACTION TAKEN
+
+The type of participation for Addresses was changed to (1:N).
+
+
+NOTES: _
+
