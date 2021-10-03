@@ -48,7 +48,8 @@ Logical Elements:  Key Type:            _
 ACTION TAKEN
 
 The type of participation for MobilePhone_Customers is voluntary.
-
+WB: This is not what we call participation (optional/manditory) this is just null support,
+WB: and possibly, edit rule.
 
 NOTES: _
 

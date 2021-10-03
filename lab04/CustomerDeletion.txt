@@ -48,6 +48,7 @@ Logical Elements:  Key Type:            _
 ACTION TAKEN
 
 The type of participation of Customer is cannot be deleted. 
-
+WB: This is not a type of participation (optional/manditory), this is a deletion rule, which
+WB: can be restrict, deny, nullify, cascade, or set default.
 NOTES: _
 

@@ -48,6 +48,7 @@ Logical Elements:  Key Type:            _
 ACTION TAKEN
 
 The degree of participation for MobilePhone was changed to (1:1)
+WB: There is not degree of participation of fields withing tables, only between tables.
 
 NOTES: _
 
