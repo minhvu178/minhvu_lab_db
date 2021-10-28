@@ -22,7 +22,8 @@
 
 
     while ($dbname = $result->fetch_array()) {?>
-        <li><?php echo $dbname[0] . "<br>";?></li>
+        <li>
+            <?php echo $dbname[0] . "<br>";?></li>
         <?php
     }
 
