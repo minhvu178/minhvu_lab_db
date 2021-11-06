@@ -1,11 +1,57 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <link rel="stylesheet" href="basic.css">
+    
+    <link rel="stylesheet" href="basic.css">
 </head>
 <body>
     <h1>Delete Instruments</h1>
 <?php 
+    $reload = false;
+    if (!isset($_COOKIE["dark"])){
+        setcookie("dark", "false", 0, '/', '', false, true);
+    }
+    if ($_POST["light_dark"]){
+        if ($_COOKIE["dark"] == "true"){
+            setcookie("dark", "false", 0, '/', '', false, true);
+        }
+        else {
+            setcookie("dark", "true", 0, '/', '', false, true);
+        }
+        $reload = true;
+    }
+
+    if ($_COOKIE["dark"]=="true") {
+        ?>  <link rel="stylesheet" href="darkmode.css"> <?php 
+    }
+    session_start();
+    if (isset($_POST["log_out"])){
+        session_unset();
+        $reload =true;
+    }
+    if (isset($_POST["username"])){
+        $_SESSION['user_id'] = $_POST["username"];
+        $_SESSION['count'] = 0;
+        $reload = true;
+    }
+    // $_POST["light_dark"] = TRUE;
+    // if (isset($_POST["light_dark"])){
+    //     unset()
+    // }
+
+
+    if (isset($_SESSION['user_id'])) {
+       ?><h2><?php echo "Welcome " . $_SESSION['user_id'];?>  </h2> 
+        <form action="manageInstruments.php" method = POST>
+            <input type="submit" value="Log out" method = POST name = "log_out"/>
+        </form><?php
+      } else {?>
+        <form action="manageInstruments.php" method = POST>
+            <h3><label for="username">Username: </label></h3>
+            <input type="text" name="username"><br>
+            <input type="submit" value="Login">
+        </form><?php
+      }
 
     ini_set('display_errors', 1);
     ini_set('display_startup_errors', 1);
@@ -22,21 +68,7 @@
         exit;
    }
 
-    // echo $_POST['crag_name'];
-    // if ($_GET['crag_name']) {
-    //     $query = "SELECT * FROM climbs WHERE crag_name = ?";
-    //     $stmt = $conn->prepare($query);
-    //     $stmt->bind_param('s', $_GET['crag_name']);
-    // } else {
-    //     $query = "SELECT * FROM climbs";
-    //     $stmt = $conn->prepare($query);
-    //     $stmt->bind_param();
-    // }
 
-
-    // $stmt->execute();
-    // $result = $stmt->get_result();
-    // $conn->close();
     if (isset($_POST["add"])){
         $conn->query("INSERT INTO instruments (instrument_type)
                         VALUES ('Guitar'),
@@ -61,14 +93,35 @@
     $del_stmt->bind_param('i', $id);
     for ($i = 0; $i < $nrows; $i++){
         $id = $resar[$i][0];
-        if (isset($_POST['delete_selected']) && isset($_POST["checkbox$id"]) && !$del_stmt->execute()) {
+        if (isset($_POST['delete_selected']) && isset($_POST["checkbox$id"]) && $del_stmt->execute()) {
+            $_SESSION['count']++;
+        } else {
             echo $conn->error;
         }
     }
 
+    if ($reload){
+        header("Location: {$_SERVER['REQUEST_URI']}", true, 303);
+        exit();
+    }
+
     $res = $conn->query($query);
     result_to_table($res);
-     
+    if (isset($_SESSION['user_id'])) {
+        ?><h3> <?php echo "You have deleted " . $_SESSION['count'] . " records this session." ?> </h3><?php
+    }
+    else {
+        ?><h3> <?php echo "You have deleted no records this session." ?> </h3><?php
+    }
+    ?> 
+
+    
+    
+    <form action="manageInstruments.php" method = POST>
+        <input type="submit" value="Toggle light/dark mode" method = POST name = "light_dark"/>
+    </form>
+    <?php
+
 ?>
 </body>
 </html>
@@ -144,7 +197,6 @@ function result_to_table($res) {
     ?>
     </table>
     <input name="delete_selected" type="submit" value="Delete Selected Records" method=POST/>
-    <input name="delete_all" type="submit" value="Delete All Records" method=POST/>
 
     </form>
 <?php
