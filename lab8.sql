@@ -42,54 +42,67 @@ VALUES ('Pikachu'),
 
 SET @max_limit = 6;
 SET @min_limit = 1;
-
+DELIMITER //
 
 DROP FUNCTION IF EXISTS trainer_active;
 CREATE FUNCTION trainer_active (IDtrainer INT)
 RETURNS BOOLEAN
 BEGIN
-    RETURN (SELECT COUNT(*) FROM pokemon WHERE trainer_id = IDtrainer AND available = true) >= @min_limit
-END;
-
-
-DELIMITER //
+    RETURN (SELECT COUNT(*) FROM pokemon WHERE trainer_id = IDtrainer AND available = true) >= @min_limit;
+END
+//
 
 CREATE TRIGGER max_limit
 AFTER INSERT ON pokemon FOR EACH ROW
 BEGIN
 
     IF 
-    (SELECT COUNT(*) FROM pokemon WHERE available = true GROUP BY trainer_id HAVING trainer_id = NEW.trainer_id) > @max_limit; 
+    (SELECT COUNT(*) FROM pokemon WHERE available = true GROUP BY trainer_id HAVING trainer_id = NEW.trainer_id) > @max_limit
     THEN
         BEGIN
             SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Exceed limits.';
         END;
     END IF;
-END;
+END
 //
-DELIMITER;
 
-DELIMITER //
+
 
 CREATE TRIGGER min_delete
 AFTER DELETE ON pokemon FOR EACH ROW
 BEGIN
     IF
-    (SELECT COUNT(*) FROM pokemon WHERE available = true GROUP BY trainer_id HAVING trainer_id = OLD.trainer_id) < @min_limit;
+    (SELECT COUNT(*) FROM pokemon WHERE available = true GROUP BY trainer_id HAVING trainer_id = OLD.trainer_id) < @min_limit
     THEN 
         BEGIN
             SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Exceed limits.';
         END;
     END IF;
-END;
-COMMIT//
-
-DELIMITER;
+END
+//
+DELIMITER ;
 
 
 
 SELECT * FROM trainers;
 SELECT * FROM pokemon;
+-- INSERT INTO pokemon (trainer_id, pokemon_name, available) 
+-- VALUES (1, 'Pikachu', true),
+--        (1, 'Charmander', true),
+--        (1, 'Bulbasuar', true),
+--        (1, 'Squirtle', true),
+--        (1, 'Geodude', true),
+--        (1, 'Magikarp', true),
+--        (1, 'Magikarp', true),
+--        (2, 'Charmander', true),
+--        (2, 'Bulbasuar', true),
+--        (2, 'Squirtle', true),
+--        (2, 'Geodude', true),
+--        (2, 'Magikarp', true);
+--        
+-- 
+-- SELECT * FROM pokemon;
+-- 
 INSERT INTO pokemon (trainer_id, pokemon_name, available) 
 VALUES (1, 'Pikachu', true),
        (1, 'Charmander', true),
@@ -97,23 +110,6 @@ VALUES (1, 'Pikachu', true),
        (1, 'Squirtle', true),
        (1, 'Geodude', true),
        (1, 'Magikarp', true),
-       (1, 'Magikarp', true),
-       (2, 'Charmander', true),
-       (2, 'Bulbasuar', true),
-       (2, 'Squirtle', true),
-       (2, 'Geodude', true),
-       (2, 'Magikarp', true);
-       
-
-SELECT * FROM pokemon;
-
-INSERT INTO pokemon (trainer_id, pokemon_name, available) 
-VALUES (1, 'Pikachu', true),
-       (1, 'Charmander', true),
-       (1, 'Bulbasuar', true),
-       (1, 'Squirtle', true),
-       (1, 'Geodude', true),
-       (1, 'Magikarp', true),
        (2, 'Charmander', true),
        (2, 'Bulbasuar', true),
        (2, 'Squirtle', true),
@@ -122,27 +118,71 @@ VALUES (1, 'Pikachu', true),
 
 
 SELECT * FROM pokemon;
-
+DELIMITER $$
 DELETE FROM pokemon WHERE trainer_id = 1;
--- DROP FUNCTION IF EXISTS pokemon_available;
--- CREATE FUNCTION pokemon_available(trainer_name CHAR(16), pokemon_name CHAR(16))
--- RETURN BOOLEAN
--- RETURN (
---     SELECT CASE WHEN EXISTS (
---         SELECT available FROM pokemon 
---     )
--- );
+DROP FUNCTION IF EXISTS pokemon_available;
+CREATE FUNCTION pokemon_available(trainer_name CHAR(16), pokemon_name CHAR(16))
+RETURNS BOOLEAN
+  BEGIN
+   IF EXISTS (SELECT available FROM pokemon)
+     THEN
+       RETURN TRUE;
+     ELSE
+       RETURN FALSE;
+  END IF;
+  END
+$$
+CREATE PROCEDURE trade_pokemon(first_trainer CHAR(16), second_trainer CHAR(16),first_pokemon CHAR(16), second_pokemon CHAR(16))
+BEGIN
+START TRANSACTION;
+  SET @firstTrainer = (SELECT first_trainer);
+  SET @secondTrainer = (SELECT second_trainer);
+  SET @firstPokemon = (SELECT first_pokemon);
+  SET @secondPokemon = (SELECT second_pokemon);
 
--- CREATE PROCEDURE trade_pokemon(first_trainer CHAR(16), second_trainer CHAR(16), first_pokemon CHAR(16), second_pokemon CHAR(16))
--- BEGIN
---     START TRANSACION;
---         IF BALA
+  SET @countPokemon1 = (SELECT COUNT(*) FROM pokemon e WHERE e.available = TRUE GROUP BY e.trainer_id HAVING e.trainer_id = @firstTrainer);
+  SET @countPokemon2 = (SELECT COUNT(*) FROM pokemon e WHERE e.available = TRUE GROUP BY e.trainer_id HAVING e.trainer_id = @secondTrainer);
 
+  IF (@countPokemon1 < @min_limit OR @countPokemon1 >@max_limit) OR (@countPokemon2 < @min_limit OR @countPokemon2 >@max_limit) THEN 
+        BEGIN
+            SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Exceed limits.';
+            ROLLBACK;
+        END;
+    ELSE 
+
+        IF (SELECT COUNT(*) FROM pokemon WHERE available = TRUE GROUP BY trainer_id HAVING trainer_id = @secondTrainer) = 0 THEN
+            DELETE FROM trainers WHERE trainer_id = @secondPokemon;
+            UPDATE pokemon SET pokemon_id = @firstPokemon, trainer_id = @firstTrainer
+                
+        ELSE 
+
+            IF (SELECT COUNT(*) FROM pokemon WHERE available = TRUE GROUP BY trainer_id HAVING trainer_id = @secondTrainer) = 0
+              THEN 
+                DELETE FROM trainers WHERE trainer_id = @secondPokemon;
+                INSERT INTO pokemon(pokemon_id, trainer_id)
+                VALUES (@firstPokemon, @firstTrainer),
+                (@secondPokemon, @firstPokemon);
+            END IF;
+        END IF;
+
+     END IF;
+  COMMIT;
+END
+$$
+DELIMITER ;
+
+  CALL trade_pokemon(1,2,9,10);
+  SELECT * FROM pokemon ;
+-- 
+-- 
 -- DELIMITER //
+-- 
 -- CREATE PROCEDURE remove_trainer(@trainer_id INT)
 -- BEGIN
---         DELETE FROM trainers WHERE trainer_id = @trainer_id;
-
--- END//
+--         DELETE FROM trainers WHERE trainer_id = @trainer_id
+-- END;
+-- 
+-- //
+-- DELIMITER ;
 
 
