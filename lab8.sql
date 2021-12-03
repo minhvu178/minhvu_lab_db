@@ -86,23 +86,23 @@ DELIMITER ;
 
 SELECT * FROM trainers;
 SELECT * FROM pokemon;
--- INSERT INTO pokemon (trainer_id, pokemon_name, available) 
--- VALUES (1, 'Pikachu', true),
---        (1, 'Charmander', true),
---        (1, 'Bulbasuar', true),
---        (1, 'Squirtle', true),
---        (1, 'Geodude', true),
---        (1, 'Magikarp', true),
---        (1, 'Magikarp', true),
---        (2, 'Charmander', true),
---        (2, 'Bulbasuar', true),
---        (2, 'Squirtle', true),
---        (2, 'Geodude', true),
---        (2, 'Magikarp', true);
---        
--- 
--- SELECT * FROM pokemon;
--- 
+INSERT INTO pokemon (trainer_id, pokemon_name, available) 
+VALUES (1, 'Pikachu', true),
+       (1, 'Charmander', true),
+       (1, 'Bulbasuar', true),
+       (1, 'Squirtle', true),
+       (1, 'Geodude', true),
+       (1, 'Magikarp', true),
+       (1, 'Magikarp', true),
+       (2, 'Charmander', true),
+       (2, 'Bulbasuar', true),
+       (2, 'Squirtle', true),
+       (2, 'Geodude', true),
+       (2, 'Magikarp', true);
+       
+
+SELECT * FROM pokemon;
+
 INSERT INTO pokemon (trainer_id, pokemon_name, available) 
 VALUES (1, 'Pikachu', true),
        (1, 'Charmander', true),
@@ -119,12 +119,12 @@ VALUES (1, 'Pikachu', true),
 
 SELECT * FROM pokemon;
 DELIMITER $$
-DELETE FROM pokemon WHERE trainer_id = 1;
+-- DELETE FROM pokemon WHERE trainer_id = 1;
 DROP FUNCTION IF EXISTS pokemon_available;
-CREATE FUNCTION pokemon_available(trainer_name CHAR(16), pokemon_name CHAR(16))
+CREATE FUNCTION pokemon_available(trainerId CHAR(16), pokemonId CHAR(16))
 RETURNS BOOLEAN
   BEGIN
-   IF EXISTS (SELECT available FROM pokemon)
+   IF EXISTS (SELECT available FROM pokemon WHERE trainer_id = trainerId AND pokemon_id = pokemonId)
      THEN
        RETURN TRUE;
      ELSE
@@ -132,6 +132,18 @@ RETURNS BOOLEAN
   END IF;
   END
 $$
+
+
+CREATE PROCEDURE remove_trainer(trainerId CHAR(16))
+BEGIN
+    SET FOREIGN_KEY_CHECKS=0;
+    DELETE FROM trainers WHERE trainer_id = trainerId;
+    DELETE FROM pokemon WHERE trainer_id = trainerId;
+    SET FOREIGN_KEY_CHECKS=1;
+END
+$$
+
+
 CREATE PROCEDURE trade_pokemon(first_trainer CHAR(16), second_trainer CHAR(16),first_pokemon CHAR(16), second_pokemon CHAR(16))
 BEGIN
 START TRANSACTION;
@@ -149,30 +161,44 @@ START TRANSACTION;
             ROLLBACK;
         END;
     ELSE 
-
-        IF (SELECT COUNT(*) FROM pokemon WHERE available = TRUE GROUP BY trainer_id HAVING trainer_id = @secondTrainer) = 0 THEN
-            DELETE FROM trainers WHERE trainer_id = @secondPokemon;
-            UPDATE pokemon SET pokemon_id = @firstPokemon, trainer_id = @firstTrainer
-                
+        IF !pokemon_available(@firstTrainer, @firstPokemon) OR !pokemon_available(@secondTrainer, @secondPokemon) THEN 
+            BEGIN
+                SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Pokemon not available for trade.';
+                ROLLBACK;
+            END;
         ELSE 
+            
+            -- IF (SELECT COUNT(*) FROM pokemon e WHERE e.available = TRUE GROUP BY e.trainer_id HAVING e.trainer_id = @secondTrainer) = 0 THEN
+            --     DELETE FROM trainers WHERE trainer_id = @secondPokemon;
+            --     UPDATE pokemon SET pokemon_id = @firstPokemon, trainer_id = @firstTrainer;
+                    
+            -- ELSE 
 
-            IF (SELECT COUNT(*) FROM pokemon WHERE available = TRUE GROUP BY trainer_id HAVING trainer_id = @secondTrainer) = 0
-              THEN 
-                DELETE FROM trainers WHERE trainer_id = @secondPokemon;
-                INSERT INTO pokemon(pokemon_id, trainer_id)
-                VALUES (@firstPokemon, @firstTrainer),
-                (@secondPokemon, @firstPokemon);
-            END IF;
+            --     IF (SELECT COUNT(*) FROM pokemon e WHERE e.available = TRUE GROUP BY e.trainer_id HAVING e.trainer_id = @secondTrainer) = 0
+            --       THEN 
+                    
+            --         UPDATE pokemon
+            --         SET trainer_id = @firstTrainer
+            --         WHERE trainer_id = @secondTrainer AND ( pokemon_id = @secondPokemon OR pokemon_id = @firstPokemon);
+            --     END IF;
+            -- END IF;
+
+            UPDATE pokemon SET trainer_id = @secondTrainer WHERE pokemon_id = @firstPokemon;
+            UPDATE pokemon SET trainer_id = @firstTrainer WHERE pokemon_id = @secondPokemon;
         END IF;
-
      END IF;
   COMMIT;
 END
 $$
 DELIMITER ;
 
-  CALL trade_pokemon(1,2,9,10);
-  SELECT * FROM pokemon ;
+CALL trade_pokemon(1,2,13,20);
+SELECT * FROM pokemon;
+CALL trade_pokemon(1,2,1,23);
+SELECT * FROM pokemon;
+CALL remove_trainer(1);
+SELECT * FROM pokemon;
+
 -- 
 -- 
 -- DELIMITER //
