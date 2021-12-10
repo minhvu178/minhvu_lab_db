@@ -1,3 +1,4 @@
+-- WB: Good work Minh. Please see some comments below.
 DROP DATABASE IF EXISTS rug_sale;
 CREATE DATABASE rug_sale;
 USE rug_sale;
@@ -5,18 +6,19 @@ USE rug_sale;
 CREATE TABLE Rugs (
     PRIMARY KEY     (RugID),
     RugID           INT AUTO_INCREMENT,
-    Description     VARCHAR(200),
+    Description     VARCHAR(200), -- WB: This is a multi-part field. Not only that, but it 
+    -- WB: would ideally have several validation tables, for country, style, and material.
     PurchasePrice   DECIMAL(9,2),
     DateAc          DATETIME(2),
     Markup          DECIMAL(4,2),
-    ListPrice       DECIMAL(9,2)
+    ListPrice       DECIMAL(9,2) -- WB: When purchase price and markup are stored, this is a calculated field.
 );
 
 CREATE TABLE Customers (
     PRIMARY KEY     (CustomerID),
     CustomerID      INT AUTO_INCREMENT,
     Name            VARCHAR(30),
-    Address         VARCHAR(200),
+    Address         VARCHAR(200), -- WB: This is a multi-part field, and should be broken up.
     Phone           INT
 );
 
