@@ -1,3 +1,4 @@
+-- WB: Good work Minh.
 DROP DATABASE IF EXISTS poke_trade;
 CREATE DATABASE poke_trade;
 USE poke_trade;
